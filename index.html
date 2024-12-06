@@ -1,0 +1,665 @@
+<html><head><base href=""><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zaggy Social - AI Content Creation</title>
+<style>
+:root {
+  --bakery: #D4A373;
+  --flower: #FF69B4;
+  --coffee: #6F4E37;
+  --pet: #98DBC6;
+  --business: #2C3E50;
+  --renovation: #34495E;
+  --boutique: #DB7093;
+  --restaurant: #228B22;
+  --primary: #2A2356;
+  --secondary: #FF6B6B;
+  --accent: #4ECDC4;
+  --light: #F7F7F7;
+  --dark: #1A1A1A;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: var(--light);
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+.nav {
+  background: var(--primary);
+  padding: 1rem;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero {
+  margin-top: 80px;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+}
+
+.example-posts {
+  display: block;
+  max-width: 1200px; /* Increased to allow for varying widths */
+  margin: 2rem auto;
+  padding: 0 2rem;
+  position: relative;
+}
+
+.post-card {
+  width: 100%;
+  max-width: 800px; /* Allow cards to be different widths */
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 4rem;
+  opacity: 0;
+  transform: translateX(-100px);
+  transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center center;
+  padding: 2rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.post-card:nth-child(even) {
+  transform: translateX(100px); /* Alternate starting positions */
+}
+
+.post-card.visible {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.post-card.exit {
+  opacity: 0;
+  transform: translateX(100px) scale(0.95);
+  transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.post-card.exit-reverse {
+  opacity: 0;
+  transform: translateX(-100px) scale(0.95);
+  transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Add new classes for reverse direction */
+.post-card.enter-reverse {
+  transform: translateX(100px);
+}
+
+.post-card.exit-reverse {
+  transform: translateX(-100px);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.brand-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+
+.post-stats {
+  display: flex;
+  gap: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.price-card {
+  background: white;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.price-card:hover {
+  transform: translateY(-5px);
+}
+
+.popular {
+  position: absolute;
+  top: 1rem;
+  right: -2rem;
+  background: var(--secondary);
+  color: white;
+  padding: 0.5rem 3rem;
+  transform: rotate(45deg);
+}
+
+.price {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 1rem 0;
+}
+
+.features {
+  list-style: none;
+  margin: 2rem 0;
+}
+
+.features li {
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn {
+  background: var(--primary);
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:hover {
+  background: var(--accent);
+}
+
+.content-preview {
+  width: 100%;
+  background: #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.5s ease-out, height 0.3s ease;
+}
+
+/* Instagram post - square format */
+.content-preview.instagram {
+  height: 400px;
+  max-width: 400px; /* Square format */
+  margin: 0 auto;
+}
+
+/* Instagram/Facebook story - vertical format */
+.content-preview.story {
+  height: 600px;
+  max-width: 340px; /* Standard story width */
+  margin: 0 auto;
+}
+
+/* Video post - 16:9 format */
+.content-preview.video {
+  height: 360px;
+  max-width: 640px; /* 16:9 aspect ratio */
+  margin: 0 auto;
+}
+
+/* Blog/article preview - wider format */
+.content-preview.blog {
+  height: 200px;
+  max-width: 800px; /* Full width for article previews */
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .content-preview.instagram {
+    height: 300px;
+    max-width: 300px;
+  }
+  
+  .content-preview.story {
+    height: 480px;
+    max-width: 270px;
+  }
+  
+  .content-preview.video {
+    height: 270px;
+    max-width: 480px;
+  }
+  
+  .content-preview.blog {
+    height: 180px;
+    max-width: 100%;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Add decorative shapes */
+.background-shapes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.shape {
+  position: absolute;
+  opacity: 0.1;
+  transition: transform 2s cubic-bezier(0.19, 1, 0.22, 1);
+  will-change: transform;
+}
+
+.shape-1 {
+  top: 20%;
+  left: 10%;
+  width: 300px;
+  height: 300px;
+  background: var(--accent);
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+.shape-2 {
+  bottom: 30%;
+  right: 15%;
+  width: 200px;
+  height: 200px;
+  background: var(--secondary);
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+}
+
+.shape-3 {
+  top: 60%;
+  left: 30%;
+  width: 250px;
+  height: 250px;
+  background: var(--primary);
+  border-radius: 35% 65% 65% 35% / 35% 65% 35% 65%;
+}
+
+@media (max-width: 768px) {
+  .content-preview.video {
+    height: 300px;
+  }
+  
+  .content-preview.story {
+    height: 400px;
+    max-width: 100%;
+  }
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M7 11v13h14V4h-7l-2-2H5v13"/>
+    </svg>
+    Zaggy Social
+  </div>
+  <a href="https://zaggy.social/contact" class="btn">Contact Sales</a>
+</nav>
+
+<section class="hero">
+  <h1>Complete Social Media Management & Content Creation</h1>
+  <p>Professional content that engages your audience and grows your brand</p>
+</section>
+
+<section class="example-posts">
+  <div class="post-card" style="background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%);">
+    <div class="content-preview instagram" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><defs><linearGradient id=\'g\' x1=\'0%\' y1=\'0%\' x2=\'100%\' y2=\'100%\'><stop offset=\'0%\' stop-color=\'%23D4A373\'/><stop offset=\'100%\' stop-color=\'%23FAEDCD\'/></linearGradient></defs><rect width=\'100\' height=\'100\' fill=\'url(%23g)\'/></svg>') center/cover">
+      <div style="position: absolute; bottom: 20px; left: 20px; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">
+        <div style="font-size: 1.4rem; font-weight: 600">Freshly Baked!</div>
+      </div>
+    </div>
+    <div class="post-header">
+      <div class="brand-avatar" style="background: linear-gradient(135deg, #D4A373, #FAEDCD);">BB</div>
+      <div>
+        <strong>Rustic Bakery</strong>
+        <div style="color: #666; font-size: 0.9rem">Instagram Post</div>
+      </div>
+    </div>
+    <p style="font-size: 0.95rem">Nothing beats the smell of freshly baked bread! ðŸ¥– Stop by Rustic Bakery for warm, handcrafted loaves made with love by our family to yours. â¤ï¸ Open 7 AM - 5 PM daily.</p>
+    <div class="post-stats">
+      <span>â¤ï¸ 842 likes</span>
+      <span>ðŸ’¬ 76 comments</span>
+      <span>ðŸ”„ 124 shares</span>
+    </div>
+  </div>
+
+  <div class="post-card" style="background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%);">
+    <div class="content-preview video" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><defs><linearGradient id=\'g\' x1=\'0%\' y1=\'0%\' x2=\'100%\' y2=\'100%\'><stop offset=\'0%\' stop-color=\'%23FF69B4\'/><stop offset=\'100%\' stop-color=\'%23FFB6C1\'/></linearGradient></defs><rect width=\'100\' height=\'100\' fill=\'url(%23g)\'/></svg>') center/cover">
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem">â–¶ï¸</div>
+        <div style="font-size: 1.2rem; font-weight: 600">Handpicked, Freshly Arranged ðŸ’</div>
+      </div>
+    </div>
+    <div class="post-header">
+      <div class="brand-avatar" style="background: linear-gradient(135deg, #FF69B4, #FFB6C1);">FS</div>
+      <div>
+        <strong>Blooming Flowers</strong>
+        <div style="color: #666; font-size: 0.9rem">Instagram Post</div>
+      </div>
+    </div>
+    <p style="font-size: 0.95rem">Brighten your day with our stunning floral arrangements! ðŸŒ¸ Visit Blooming Flowers for bouquets that speak from the heart. ðŸŒ¼ Open 9 AM - 6 PM daily.</p>
+    <div class="post-stats">
+      <span>â¤ï¸ 1230 likes</span>
+      <span>ðŸ’¬ 45 comments</span>
+      <span>ðŸ”„ 89 shares</span>
+    </div>
+  </div>
+
+  <div class="post-card" style="background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%);">
+    <div class="content-preview blog" style="background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><defs><linearGradient id=\'g\' x1=\'0%\' y1=\'0%\' x2=\'100%\' y2=\'100%\'><stop offset=\'0%\' stop-color=\'%23FF6B6B\'/><stop offset=\'100%\' stop-color=\'%23FF8E53\'/></linearGradient></defs><rect width=\'100\' height=\'100\' fill=\'url(%23g)\'/></svg>') center/cover">
+      <div style="position: absolute; bottom: 10px; left: 10px; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">
+        <div style="font-size: 1.2rem; font-weight: 600">Autumn Collection</div>
+        <div style="font-size: 0.8rem">Swipe to explore â†’</div>
+      </div>
+    </div>
+    <div class="post-header">
+      <div class="brand-avatar" style="background: linear-gradient(135deg, #FF6B6B, #FF8E53);">FC</div>
+      <div>
+        <strong>Fresh Cafe</strong>
+        <div style="color: #666; font-size: 0.9rem">Featured Campaign</div>
+      </div>
+    </div>
+    <p style="font-size: 0.95rem">ðŸ‚ Fall in love with our new seasonal menu! Featuring locally-sourced ingredients and creative twists on autumn classics. #FoodArt #SeasonalDelights</p>
+    <div class="post-stats">
+      <span>ðŸŽ¨ 893 shares</span>
+      <span>â¤ï¸ 3.2k likes</span>
+      <span>ðŸŒŸ 156 reviews</span>
+    </div>
+  </div>
+
+  <div class="post-card" style="background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%);">
+    <div class="content-preview instagram" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><defs><linearGradient id=\'g\' x1=\'0%\' y1=\'0%\' x2=\'100%\' y2=\'100%\'><stop offset=\'0%\' stop-color=\'%23A8E6CF\'/><stop offset=\'100%\' stop-color=\'%233B7B59\'/></linearGradient></defs><rect width=\'100\' height=\'100\' fill=\'url(%23g)\'/></svg>') center/cover">
+      <div style="position: absolute; bottom: 20px; left: 20px; color: white;">
+        <div style="font-size: 1.4rem; font-weight: 600">Eco-Friendly Product Launch</div>
+        <div style="font-size: 0.9rem; opacity: 0.9">Interactive Story â€¢ 5 slides</div>
+      </div>
+    </div>
+    <div class="post-header">
+      <div class="brand-avatar" style="background: linear-gradient(135deg, #A8E6CF, #3B7B59);">EW</div>
+      <div>
+        <strong>EcoWare</strong>
+        <div style="color: #666; font-size: 0.9rem">Instagram Story Campaign</div>
+      </div>
+    </div>
+    <p style="font-size: 0.95rem">ðŸŒ¿ Introducing our biodegradable kitchen essentials! Swipe through to see how we're making sustainability stylish. #EcoLiving #Sustainability</p>
+    <div class="post-stats">
+      <span>ðŸ‘€ 15.7k views</span>
+      <span>â†—ï¸ 423 shares</span>
+      <span>ðŸ’« 89% completion</span>
+    </div>
+  </div>
+
+  <div class="post-card" style="background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%);">
+    <div class="content-preview blog" style="background: linear-gradient(to right, #fff, #f8f8f8);">
+      <div style="display: flex; gap: 1rem; height: 100%;">
+        <div style="flex: 0 0 30%; background: var(--accent); opacity: 0.1; border-radius: 8px;"></div>
+        <div style="flex: 1; padding: 1rem 0;">
+          <div class="blog-title" style="color: var(--primary); font-size: 1.1rem; margin-bottom: 0.5rem;">Quick Tips: Social Media Success</div>
+          <div class="blog-excerpt" style="font-size: 0.85rem; color: #666; line-height: 1.4;">
+            â€¢ Post consistently<br>
+            â€¢ Engage with followers<br>
+            â€¢ Use trending hashtags
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="post-header">
+      <div class="brand-avatar" style="background: linear-gradient(135deg, var(--primary), var(--accent));">SM</div>
+      <div>
+        <strong>Social Masters</strong>
+        <div style="color: #666; font-size: 0.9rem">Quick Tips Series</div>
+      </div>
+    </div>
+    <div class="post-stats">
+      <span>ðŸ“± Social Post</span>
+      <span>ðŸ”„ Weekly Series</span>
+      <span>ðŸ“Š 32% Engagement</span>
+    </div>
+  </div>
+
+  <div class="post-card" style="background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%);">
+    <div class="content-preview video" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><defs><linearGradient id=\'g\' x1=\'0%\' y1=\'0%\' x2=\'100%\' y2=\'100%\'><stop offset=\'0%\' stop-color=\'%23FF6B6B\'/><stop offset=\'100%\' stop-color=\'%23556270\'/></linearGradient></defs><rect width=\'100\' height=\'100\' fill=\'url(%23g)\'/></svg>') center/cover">
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white;">
+        <div style="font-size: 3rem; margin-bottom: 1rem">â–¶ï¸</div>
+        <div style="font-size: 1.2rem; font-weight: 600">Product Launch Event</div>
+        <div style="font-size: 0.9rem; opacity: 0.8">Full Coverage â€¢ 2:45</div>
+      </div>
+    </div>
+    <div class="post-header">
+      <div class="brand-avatar" style="background: linear-gradient(135deg, #FF6B6B, #556270);">TL</div>
+      <div>
+        <strong>Tech Leaders</strong>
+        <div style="color: #666; font-size: 0.9rem">Event Coverage</div>
+      </div>
+    </div>
+    <p style="font-size: 0.95rem">ðŸš€ Missed our biggest launch yet? Watch the full recap of our game-changing product reveal! #TechInnovation #ProductLaunch</p>
+    <div class="post-stats">
+      <span>ðŸŽ¥ 45.2k views</span>
+      <span>ðŸ‘ 3.8k likes</span>
+      <span>ðŸ’¬ 567 comments</span>
+    </div>
+  </div>
+</section>
+
+<div class="pricing-grid">
+  <div class="price-card">
+    <h2>Social Media Mini Boost</h2>
+    <div class="price">$42<span style="font-size: 1rem">/mo</span></div>
+    <ul class="features">
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        4 Custom Social Media Posts
+      </li>
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        1 Video Post
+      </li>
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        Basic Engagement Tracking
+      </li>
+    </ul>
+    <a href="https://zaggy.social/signup" class="btn">Get Started</a>
+  </div>
+
+  <div class="price-card">
+    <div class="popular">POPULAR</div>
+    <h2>Enhanced Social & Website</h2>
+    <div class="price">$60<span style="font-size: 1rem">/mo</span></div>
+    <ul class="features">
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        8 Premium Social Posts
+      </li>
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        2 Professional Videos
+      </li>
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        Enhanced Engagement Strategy
+      </li>
+    </ul>
+    <a href="https://zaggy.social/signup" class="btn pulse">Get Started</a>
+  </div>
+
+  <div class="price-card">
+    <h2>High-Impact Digital Package</h2>
+    <div class="price">$140<span style="font-size: 1rem">/mo</span></div>
+    <ul class="features">
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        8 High-Value Social Posts
+      </li>
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        2 Professional Videos
+      </li>
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        Monthly SEO Blog Post
+      </li>
+      <li>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        Website Management
+      </li>
+    </ul>
+    <a href="https://zaggy.social/enterprise" class="btn">Get Started</a>
+  </div>
+</div>
+
+<script>
+// Update the scroll animation logic
+window.addEventListener('scroll', () => {
+  const scrolled = window.pageYOffset;
+  const shapes = document.querySelectorAll('.shape');
+  
+  // Enhanced shape movement
+  shapes.forEach((shape, index) => {
+    const speed = (index + 1) * 0.1;
+    const yPos = -(scrolled * speed);
+    const xPos = Math.sin(scrolled * 0.002 + index) * 25;
+    const rotation = Math.cos(scrolled * 0.001 + index) * 15;
+    const scale = 1 + Math.sin(scrolled * 0.001) * 0.1;
+    
+    shape.style.transform = `translate3d(${xPos}px, ${yPos}px, 0) 
+                            rotate(${rotation}deg) 
+                            scale(${scale})`;
+  });
+
+  // Smoother post card animations
+  document.querySelectorAll('.post-card').forEach((card, index) => {
+    const rect = card.getBoundingClientRect();
+    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+    
+    if (isVisible) {
+      const scrollPercent = (window.innerHeight - rect.top) / window.innerHeight;
+      const isEven = index % 2 === 0;
+      const moveAmount = (scrollPercent - 0.5) * 30;
+      
+      card.style.transform = `translateX(${isEven ? -moveAmount : moveAmount}px)`;
+      card.style.opacity = scrollPercent > 0.1 ? 1 : 0;
+    }
+  });
+});
+
+// Update Intersection Observer
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const card = entry.target;
+      const index = Array.from(document.querySelectorAll('.post-card')).indexOf(card);
+      const isEven = index % 2 === 0;
+      
+      // Add smoother entrance based on content type
+      const contentType = card.querySelector('.content-preview').classList;
+      const delay = contentType.contains('video') ? 200 : 
+                    contentType.contains('story') ? 300 : 100;
+      
+      setTimeout(() => {
+        card.style.transform = 'translateX(0)';
+        card.style.opacity = 1;
+      }, index * delay);
+    } else {
+      const card = entry.target;
+      const index = Array.from(document.querySelectorAll('.post-card')).indexOf(card);
+      const isEven = index % 2 === 0;
+      
+      card.style.transform = `translateX(${isEven ? -100 : 100}px)`;
+      card.style.opacity = 0;
+    }
+  });
+}, {
+  threshold: 0.1, // Trigger slightly earlier
+  rootMargin: '-50px 0px -50px 0px'
+});
+
+// Observe all post cards
+document.querySelectorAll('.post-card').forEach(card => {
+  observer.observe(card);
+});
+
+// Add background shapes
+const shapesDiv = document.createElement('div');
+shapesDiv.className = 'background-shapes';
+shapesDiv.innerHTML = `
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+`;
+document.body.appendChild(shapesDiv);
+
+</script>
+
+</body></html>
